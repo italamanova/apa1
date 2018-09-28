@@ -1,4 +1,5 @@
 import ast
+import re
 
 from project.basic_structures import Analysis, Class, Method
 from tests import a2
