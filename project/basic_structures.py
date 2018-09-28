@@ -26,21 +26,31 @@ class Analysis:
 class Class:
     def __init__(self, _name):
         self.name = _name
+        self.methods = []
 
     def __str__(self):
         return 'Class %s' % (self.name)
 
     def __repr__(self):
         return 'Class %s' % (self.name)
+
+    def add_method(self, method):
+        if method not in self.methods:
+            self.methods.append(method)
 
 
 class Method:
     def __init__(self, _name, _params):
         self.name = _name
         self.params = _params
+        self.calls = []
 
     def __str__(self):
         return 'Method %s %s' % (self.name, self.params)
 
     def __repr__(self):
         return 'Method %s %s' % (self.name, self.params)
+
+    def add_call(self, call):
+        if call not in self.calls:
+            self.calls.append(call)

@@ -1,7 +1,2 @@
 digraph G {
-	I -> A
-	A -> C
-	object -> I
-	object -> B
-	B -> C
 }
