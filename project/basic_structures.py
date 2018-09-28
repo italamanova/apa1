@@ -44,6 +44,11 @@ class Class:
         if method not in self.methods:
             self.methods.append(method)
 
+    def get_method(self, method_name):
+        for method in self.methods:
+            if method.name == method_name:
+                return method
+        return None
 
 class Method:
     def __init__(self, _name, _params):

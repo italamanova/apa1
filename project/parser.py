@@ -7,6 +7,9 @@ from tests import a2
 hierarchy = {}
 
 file_structure = []
+all_methods = []
+
+call_graph = {}
 
 
 def get_file(file_path):
@@ -84,17 +87,41 @@ class NodeVisitor(ast.NodeVisitor):
         file_structure.append(current_class)
 
 
+def walk_file_structure(method_name):
+    for i, class_item in enumerate(file_structure):
+        for method_item in class_item.methods:
+            if method_item.name == method_name:
+                _method = file_structure[i].get_method(method_name)
+                call_graph.update({method_name: _method.calls})
+                for call_name in _method.calls:
+                    walk_file_structure(call_name)
+
+
+file = get_file('/home/talamash/PycharmProjects/apa1/tests/a2.py')
 tree = ast.parse(get_file('/home/talamash/PycharmProjects/apa1/tests/a2.py'))
 
-# print(ast.dump(tree))
+print(ast.dump(tree))
 NodeVisitor().visit(tree)
 
-# print('hierarchy', hierarchy)
-print('file_structure')
-for item in file_structure:
-    print(item)
-    for call_item in item.methods:
-        print('call', call_item)
+main_class_name, main_method_name = get_main_function(file)
+
+for i, class_item in enumerate(file_structure):
+    if main_method_name:
+        if class_item.name == main_class_name:
+            for method_item in class_item.methods:
+                if method_item.name == main_method_name:
+                    main_method = file_structure[i].get_method(main_method_name)
+                    print('CALLS', main_method.calls)
+                    call_graph.update({main_method_name: main_method.calls})
+                    for method_call_name in main_method.calls:
+                        walk_file_structure(method_call_name)
+
+        else:
+            # check function without class
+            pass
+
 analysis = Analysis(a2, hierarchy)
 
 # draw_graph('', hierarchy)
+
+print(call_graph)

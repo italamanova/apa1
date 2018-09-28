@@ -3,9 +3,13 @@ import sys
 class I(object):
     strI = "Printing I string"
 
+    def kokoko(self):
+        pass
+
     def m(self):
         i = 1
         print('I: m method in I')
+        self.kokoko()
 
 
 class A(I):
