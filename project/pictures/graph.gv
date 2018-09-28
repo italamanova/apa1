@@ -1,7 +1,7 @@
 digraph G {
-	A -> B
-	A -> C
 	I -> A
-	object -> Delegation
+	A -> C
 	object -> I
+	object -> B
+	B -> C
 }

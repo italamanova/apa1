@@ -1,4 +1,6 @@
-class I:
+import itertools
+
+class I(object):
     strI = "Printing I string"
 
     def m(self):
@@ -12,12 +14,12 @@ class A(I):
     #     print('A: m method in A')
 
 
-class B(A):
+class B(object):
     def __init__(self):
         self.m()
 
 
-class C(B):
+class C(A, B):
     def m(self):
         print('C: m method in C')
 

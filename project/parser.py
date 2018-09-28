@@ -1,76 +1,58 @@
-import inspect
+import ast
 
-from project.basic_structures import Analysis, Method
+from project.basic_structures import Analysis, Class
 from project.drawer import draw_graph
-from project.function_parser import get_main_function
 from tests import a2
 
-analysis = Analysis(a2)
+hierarchy = {}
 
 
-def draw_classes():
-    hierarchy = analysis.hierarchy
-    # print(hierarchy)
-    draw_graph('', hierarchy)
+def get_file(file_path):
+    with open(file_path, 'r') as file:
+        data = file.read()
+        return data
 
 
-def get_methods():
-    file = analysis.file
-    main_class_name, main_method_name = get_main_function(file)
+class NodeVisitor(ast.NodeVisitor):
 
-    hierarchy = analysis.hierarchy
-    print('hierarchy', hierarchy)
-    instance_dict = {}
-    simple_instance_dict = {}
-    classes = inspect.getmembers(file, predicate=inspect.isclass)
+    def visit_Import(self, tree_node):
+        print('import', tree_node.names)
+        for item in tree_node.names:
+            print(item.name)
+            module_instance = sys.modules[item.name]
+            # print('MODULE', dir(module_instance))
+        self.generic_visit(tree_node)
 
-    for instance_name, instance in classes:
-        # print(111,
-        #       [attr for attr in dir(instance) if not callable(getattr(instance, attr)) and not attr.startswith("__")])
+    def visit_ClassDef(self, tree_node):
+        child = tree_node.name
+        parents = tree_node.bases
 
-        class_functions = inspect.getmembers(instance, predicate=inspect.isfunction)
-        class_methods = inspect.getmembers(instance, predicate=inspect.ismethod)
-        all_class_methods = class_functions + class_methods
-        method_list = [Method(current_method_name, method_instance) for current_method_name, method_instance in
-                       all_class_methods]
+        for parent in parents:
+            parent_name = parent.id
+            if parent_name in hierarchy:
+                hierarchy.get(parent_name).append(child)
+            else:
+                hierarchy.update({parent_name: [child]})
 
-        instance_dict.update({instance_name: method_list})
-        # simple_instance_dict.update(
-        #     {instance_name: [current_method_name for current_method_name, method_instance in all_class_methods]})
+        self.generic_visit(tree_node)
 
-        for method in method_list:
-            method.get_variables()
-            # calls = method.find_calls()
-            # print('called_methods', calls)
-    print('instance_dict', instance_dict)
-    # if main_class_name:
-    #     main_class_methods = instance_dict.get(main_class_name)
-    #     main_method = [item for item in main_class_methods if main_method_name in item]
-    #     calls = find_calls(main_method[0][1])
-    #     print('calls', calls)
-    #     check_calls(calls, instance_dict)
-    #     #recursively call for each method
+    def visit_FunctionDef(self, tree_node):
+        print('func', tree_node.name, tree_node.args)
+        self.generic_visit(tree_node)
 
-    # else:
-    #     # handle function without class
-    #     pass
+    def visit_Call(self, tree_node):
+        func = tree_node.func
+        if isinstance(func, ast.Name):
+            print('name', func.id)
 
-    # print('class: ', instance.__name__)
-    # print('class_members: ', class_functions)
-    # print()
-    # print('---', simple_instance_dict)
+        if isinstance(func, ast.Attribute):
+            print('attr', func.value.id, func.attr)
 
 
-def draw_call_graph():
-    pass
+tree = ast.parse(get_file('/home/talamash/PycharmProjects/apa1/tests/a2.py'))
+NodeVisitor().visit(tree)
 
+print('hierarchy', hierarchy)
+analysis = Analysis(a2, hierarchy)
 
-# draw_classes(a2)
-get_methods()
-
-# print(dir(a2.itertools))
-
-# hierarchy = get_class_hierarchy(a2)
-# print(hierarchy)
-# print(get_children('B', hierarchy))
-# print(get_parents('B', a2))
+draw_graph('', hierarchy)
