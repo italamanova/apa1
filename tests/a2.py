@@ -1,27 +1,27 @@
 import sys
-#
-# class I(object):
-#     strI = "Printing I string"
-#
-#     def m(self):
-#         i = 1
-#         print('I: m method in I')
-#
-#
-# class A(I):
-#     pass
-#     # def m(self):
-#     #     print('A: m method in A')
-#
-#
-# class B(object):
-#     def __init__(self):
-#         self.m()
-#
-#
-# class C(A, B):
-#     def m(self):
-#         print('C: m method in C')
+
+class I(object):
+    strI = "Printing I string"
+
+    def m(self):
+        i = 1
+        print('I: m method in I')
+
+
+class A(I):
+    pass
+    # def m(self):
+    #     print('A: m method in A')
+
+
+class B(I):
+    def __init__(self):
+        self.m()
+
+
+class C(A, B):
+    def m(self):
+        print('C: m method in C')
 
 
 class Delegation:
@@ -33,6 +33,7 @@ class Delegation:
     def main(self):
         i = 1
         i.m()
+        i.n()
 
 
 

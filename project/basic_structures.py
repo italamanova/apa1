@@ -29,10 +29,16 @@ class Class:
         self.methods = []
 
     def __str__(self):
-        return 'Class %s' % (self.name)
+        return 'Class %s Methods: %s' % (self.name, self.methods)
 
     def __repr__(self):
         return 'Class %s' % (self.name)
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash("foobar" * len(self.name))
 
     def add_method(self, method):
         if method not in self.methods:
@@ -46,10 +52,10 @@ class Method:
         self.calls = []
 
     def __str__(self):
-        return 'Method %s %s' % (self.name, self.params)
+        return 'Method %s, Calls: %s' % (self.name, self.calls)
 
     def __repr__(self):
-        return 'Method %s %s' % (self.name, self.params)
+        return 'Method %s' % (self.name)
 
     def add_call(self, call):
         if call not in self.calls:
