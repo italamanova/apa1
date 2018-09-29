@@ -29,10 +29,12 @@ class Class:
         self.methods = []
 
     def __str__(self):
-        return 'Class %s Methods: %s' % (self.name, self.methods)
+        # return 'Class %s Methods: %s' % (self.name, self.methods)
+        return self.name
 
     def __repr__(self):
-        return 'Class %s Methods: %s' % (self.name, self.methods)
+        # return 'Class %s Methods: %s' % (self.name, self.methods)
+        return self.name
 
     def __eq__(self, other):
         return self.name == other.name
@@ -50,6 +52,17 @@ class Class:
                 return method
         return None
 
+    def get_call_class(self, call_instance_name):
+        for method in self.methods:
+            if method.name == call_instance_name:
+                return self
+
+    def set_call_class(self, call_instance, class_instance):
+        for method in self.methods:
+            for call in method.calls:
+                if call == call_instance:
+                    call_instance.method_class = class_instance
+
 class Function:
     def __init__(self, _name, _params):
         self.name = _name
@@ -65,3 +78,24 @@ class Function:
     def add_call(self, call):
         if call not in self.calls:
             self.calls.append(call)
+
+    def is_equal(self, method_call_name):
+        return method_call_name == self.name
+
+
+class FunctionCall:
+    def __init__(self, _name):
+        self.name = _name
+        self.method_class = None
+
+    # def __str__(self):
+    #     return '%s.%s' % (self.name, self.method_class)
+    #
+    # def __repr__(self):
+    #     return '%s.%s' % (self.name, self.method_class)
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+    def __repr__(self):
+        return '%s' % (self.name)

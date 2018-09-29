@@ -5,12 +5,10 @@ class ComplexNumber:
 
     def getData(self):
         print("{0}+{1}j".format(self.real, self.imag))
-        Ko().azaza()
 
+    def m(self):
+        print(1)
 
-class Ko:
-    def azaza(self):
-        print('lol')
 
 
 def main(self):
@@ -25,6 +23,7 @@ def main(self):
     # and create a new attribute 'attr'
     c2 = ComplexNumber(5)
     c2.attr = 10
+    c2.m()
 
     # Output: (5, 0, 10)
     print((c2.real, c2.imag, c2.attr))
