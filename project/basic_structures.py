@@ -32,7 +32,7 @@ class Class:
         return 'Class %s Methods: %s' % (self.name, self.methods)
 
     def __repr__(self):
-        return 'Class %s' % (self.name)
+        return 'Class %s Methods: %s' % (self.name, self.methods)
 
     def __eq__(self, other):
         return self.name == other.name
@@ -50,17 +50,17 @@ class Class:
                 return method
         return None
 
-class Method:
+class Function:
     def __init__(self, _name, _params):
         self.name = _name
         self.params = _params
         self.calls = []
 
     def __str__(self):
-        return 'Method %s, Calls: %s' % (self.name, self.calls)
+        return 'Function %s, Calls: %s' % (self.name, self.calls)
 
     def __repr__(self):
-        return 'Method %s' % (self.name)
+        return 'Function %s, Calls: %s' % (self.name, self.calls)
 
     def add_call(self, call):
         if call not in self.calls:

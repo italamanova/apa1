@@ -1,10 +1,9 @@
 import ast
 import re
 
-from project.basic_structures import Analysis, Class, Method
+from project.basic_structures import Analysis, Class, Function
+from project.drawer import draw_call_graph
 from tests import a2
-
-hierarchy = {}
 
 file_structure = []
 all_methods = []
@@ -18,22 +17,30 @@ def get_file(file_path):
         return data
 
 
-def get_main_function(_source):
-    pattern = r'if __name__ == \'__main__\'\:\s*(.+)$'
-    match = re.findall(pattern, _source)[0]
-    splitted_match = match.split('.')
+class FileStructureVisitor(ast.NodeVisitor):
 
-    if len(splitted_match) < 2:
-        class_name = None
-        main_method_name = re.findall(r'(\w+)\(', splitted_match[0])
-    else:
-        class_name = re.findall(r'(\w+)\(', splitted_match[0])[0]
-        main_method_name = re.findall(r'(\w+)\(', splitted_match[1])[0]
+    def __init__(self):
+        super(FileStructureVisitor, self).__init__()
+        self.hierarchy = {}
 
-    return class_name, main_method_name
+    def handle_FunctionDef(self, function_item):
+        current_function = Function(function_item.name, function_item.args)
+        for node in ast.walk(function_item):
+            if isinstance(node, ast.Call):
+                func = node.func
+                if isinstance(func, ast.Name):
+                    # print('name', func.id)
+                    current_function.add_call(func.id)
 
+                if isinstance(func, ast.Attribute):
+                    if isinstance(func.value, ast.Call):
+                        # print('another call', func.value, func.attr)
+                        current_function.add_call(func.attr)
+                    else:
+                        # print('attr', func.value.id, func.attr)
+                        current_function.add_call(func.attr)
+        return current_function
 
-class NodeVisitor(ast.NodeVisitor):
 
     # def visit_Import(self, tree_node):
     #     print('import', tree_node.names)
@@ -57,34 +64,39 @@ class NodeVisitor(ast.NodeVisitor):
         for parent in parents:
             parent_name = parent.id
             parent_class = Class(parent_name)
-            if parent_class in hierarchy:
-                hierarchy.get(parent_class).append(child_class)
+            if parent_class in self.hierarchy:
+                self.hierarchy.get(parent_class).append(child_class)
             else:
-                hierarchy.update({parent_class: [child_class]})
+                self.hierarchy.update({parent_class: [child_class]})
 
         current_class = Class(child)
-
         for function_item in ast.iter_child_nodes(tree):
             if isinstance(function_item, ast.FunctionDef):
-                current_method = Method(function_item.name, function_item.args)
-                current_class.add_method(current_method)
-
-                for node in ast.walk(function_item):
-                    if isinstance(node, ast.Call):
-                        func = node.func
-                        if isinstance(func, ast.Name):
-                            # print('name', func.id)
-                            current_method.add_call(func.id)
-
-                        if isinstance(func, ast.Attribute):
-                            if isinstance(func.value, ast.Call):
-                                # print('another call', func.value, func.attr)
-                                current_method.add_call(func.attr)
-                            else:
-                                # print('attr', func.value.id, func.attr)
-                                current_method.add_call(func.attr)
+                fuction_instance = self.handle_FunctionDef(function_item)
+                current_class.add_method(fuction_instance)
 
         file_structure.append(current_class)
+
+
+def get_main_function(_source):
+    pattern = r'if __name__ == (\'|\")__main__(\'|\")\:\s*(.+)$'
+    match = re.findall(pattern, _source)
+    try:
+        main_names = match[0][2]
+    except IndexError:
+        return None
+
+    splitted_match = main_names.split('.')
+    print('splitted_match', splitted_match)
+
+    if len(splitted_match) < 2:
+        class_name = None
+        main_method_name = re.findall(r'(\w+)\(', splitted_match[0])[0]
+    else:
+        class_name = re.findall(r'(\w+)\(', splitted_match[0])[0]
+        main_method_name = re.findall(r'(\w+)\(', splitted_match[1])[0]
+
+    return class_name, main_method_name
 
 
 def walk_file_structure(method_name):
@@ -97,31 +109,56 @@ def walk_file_structure(method_name):
                     walk_file_structure(call_name)
 
 
-file = get_file('/home/talamash/PycharmProjects/apa1/tests/a2.py')
-tree = ast.parse(get_file('/home/talamash/PycharmProjects/apa1/tests/a2.py'))
+def prepare_graph_data():
+    source_file = get_file('/home/talamash/PycharmProjects/apa1/tests/a3.py')
+    tree = ast.parse(source_file)
 
-print(ast.dump(tree))
-NodeVisitor().visit(tree)
+    print(ast.dump(tree))
+    file_structure_visitor = FileStructureVisitor()
+    file_structure_visitor.visit(tree)
 
-main_class_name, main_method_name = get_main_function(file)
+    for direct_child in ast.iter_child_nodes(tree):
+        if not isinstance(direct_child, ast.ClassDef):
+            for node in ast.walk(direct_child):
+                if isinstance(node, ast.FunctionDef):
+                    outside_function = file_structure_visitor.handle_FunctionDef(node)
+                    file_structure.append(outside_function)
 
-for i, class_item in enumerate(file_structure):
-    if main_method_name:
-        if class_item.name == main_class_name:
-            for method_item in class_item.methods:
-                if method_item.name == main_method_name:
-                    main_method = file_structure[i].get_method(main_method_name)
-                    print('CALLS', main_method.calls)
-                    call_graph.update({main_method_name: main_method.calls})
-                    for method_call_name in main_method.calls:
+
+    _main = get_main_function(source_file)
+    if _main:
+        main_class_name, main_method_name = get_main_function(source_file)
+
+        for i, file_structure_item in enumerate(file_structure):
+
+            if main_class_name:
+                if file_structure_item.name == main_class_name:
+                        for method_item in file_structure_item.methods:
+                            if method_item.name == main_method_name:
+                                main_method = file_structure[i].get_method(main_method_name)
+                                call_graph.update({main_method_name: main_method.calls})
+                                for method_call_name in main_method.calls:
+                                    walk_file_structure(method_call_name)
+
+            else:
+
+                if file_structure_item.name == main_method_name:
+                    main_function = file_structure[i]
+                    call_graph.update({main_method_name: main_function.calls})
+                    for method_call_name in main_function.calls:
                         walk_file_structure(method_call_name)
+    else:
+        pass
 
-        else:
-            # check function without class
-            pass
-
-analysis = Analysis(a2, hierarchy)
+    print(file_structure)
 
 # draw_graph('', hierarchy)
 
-print(call_graph)
+# print(file_structure)
+
+
+prepare_graph_data()
+print('CALL', call_graph)
+
+# draw_call_graph('', call_graph)
+

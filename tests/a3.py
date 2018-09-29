@@ -1,25 +1,38 @@
+class ComplexNumber:
+    def __init__(self, r=0, i=0):
+        self.real = r
+        self.imag = i
 
-#!/usr/bin/env python
-
-# 05-init_constructor-2.py
-
-# We add a test in the __init__() constructor to check
-# if 'value' is an int or not.
-
-
-class MyNum(object):
-    def __init__(self, value):
-        try:
-            value = int(value)
-        except ValueError:
-            value = 0
-        self.value = value
-
-    def increment(self):
-        self.value = self.value + 1
-        print(self.value)
+    def getData(self):
+        print("{0}+{1}j".format(self.real, self.imag))
+        Ko().azaza()
 
 
-a = MyNum(10)
-a.increment()   # This should print 11
-a.increment()   # This should print 12
+class Ko:
+    def azaza(self):
+        print('lol')
+
+
+def main(self):
+    # Create a new ComplexNumber object
+    c1 = ComplexNumber(2, 3)
+
+    # Call getData() function
+    # Output: 2+3j
+    c1.getData()
+
+    # Create another ComplexNumber object
+    # and create a new attribute 'attr'
+    c2 = ComplexNumber(5)
+    c2.attr = 10
+
+    # Output: (5, 0, 10)
+    print((c2.real, c2.imag, c2.attr))
+
+    # but c1 object doesn't have attribute 'attr'
+    # AttributeError: 'ComplexNumber' object has no attribute 'attr'
+    c1.attr
+
+
+if __name__ == '__main__':
+    main()
