@@ -138,13 +138,13 @@ def walk_file_structure(method_name):
 
 
 def prepare_graph_data():
-    source_file = get_file('/home/talamash/PycharmProjects/apa1/tests/a3.py')
+    source_file = get_file('/home/talamash/PycharmProjects/apa1/tests/a2.py')
     tree = ast.parse(source_file)
 
+    #create file structure
     print(ast.dump(tree))
     file_structure_visitor = FileStructureVisitor()
     file_structure_visitor.visit(tree)
-
 
     for direct_child in ast.iter_child_nodes(tree):
         if not isinstance(direct_child, ast.ClassDef):
@@ -152,6 +152,8 @@ def prepare_graph_data():
                 if isinstance(node, ast.FunctionDef):
                     outside_function = file_structure_visitor.handle_FunctionDef(node)
                     file_structure.append(outside_function)
+
+    #create call graph
 
     _main = get_main_function(source_file)
     if _main:
@@ -175,9 +177,6 @@ def prepare_graph_data():
                     call_graph.update({main_method_name: main_function.calls})
                     for method_call_name in main_function.calls:
                         walk_file_structure(method_call_name)
-
-    print('file_structure', file_structure)
-    print('call_graph', call_graph)
 
     all_calls = file_structure_visitor.all_calls
     # new_call_graph = find_call_classes(all_calls, call_graph)

@@ -13,9 +13,8 @@ class I(object):
 
 
 class A(I):
-    pass
-    # def m(self):
-    #     print('A: m method in A')
+    def m(self):
+        print('A: m method in A')
 
 
 class B(I):
