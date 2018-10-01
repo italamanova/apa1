@@ -1,2 +1,7 @@
 digraph G {
+	object -> I
+	B -> C
+	A -> C
+	I -> A
+	I -> B
 }

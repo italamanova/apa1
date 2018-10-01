@@ -29,12 +29,12 @@ class Class:
         self.methods = []
 
     def __str__(self):
-        # return 'Class %s Methods: %s' % (self.name, self.methods)
-        return self.name
+        return 'Class %s Methods: %s' % (self.name, self.methods)
+        # return self.name
 
     def __repr__(self):
-        # return 'Class %s Methods: %s' % (self.name, self.methods)
-        return self.name
+        return 'Class %s Methods: %s' % (self.name, self.methods)
+        # return self.name
 
     def __eq__(self, other):
         return self.name == other.name
@@ -57,23 +57,25 @@ class Class:
             if method.name == call_instance_name:
                 return self
 
-    def set_call_class(self, call_instance, class_instance):
+    def set_call_class(self, call_name, class_instance):
         for method in self.methods:
             for call in method.calls:
-                if call == call_instance:
-                    call_instance.method_class = class_instance
+                if call.name == call_name:
+                    call.set_class_name(class_instance.name)
+
 
 class Function:
     def __init__(self, _name, _params):
         self.name = _name
+        self.class_name = None
         self.params = _params
         self.calls = []
 
     def __str__(self):
-        return 'Function %s, Calls: %s' % (self.name, self.calls)
+        return 'Function %s.%s, Calls: %s' % (self.class_name, self.name, self.calls)
 
     def __repr__(self):
-        return 'Function %s, Calls: %s' % (self.name, self.calls)
+        return 'Function %s.%s, Calls: %s' % (self.class_name, self.name, self.calls)
 
     def add_call(self, call):
         if call not in self.calls:
@@ -86,16 +88,19 @@ class Function:
 class FunctionCall:
     def __init__(self, _name):
         self.name = _name
-        self.method_class = None
-
-    # def __str__(self):
-    #     return '%s.%s' % (self.name, self.method_class)
-    #
-    # def __repr__(self):
-    #     return '%s.%s' % (self.name, self.method_class)
+        self.class_name = None
 
     def __str__(self):
         return '%s' % (self.name)
 
     def __repr__(self):
         return '%s' % (self.name)
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash("finctioncall" * len(self.name))
+
+    def set_class_name(self, _class_name):
+        self.class_name = _class_name
