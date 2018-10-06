@@ -17,16 +17,10 @@ class Analysis:
                         children += deep_children_search
         return children
 
-    def get_parents(self, class_name):
-        class_instance = getattr(self.file, class_name)
-        mro = list(inspect.getmro(class_instance))[1:-1]
-        return mro
-
 
 class Package:
     def __init__(self, _name):
         self.name = _name
-        self.classes = []
 
     def __str__(self):
         return 'Package %s' % (self.name)
@@ -38,8 +32,9 @@ class Package:
 
 
 class Class:
-    def __init__(self, _name):
+    def __init__(self, _name, _parent):
         self.name = _name
+        self.parent = _parent
         self.methods = []
 
     def __str__(self):
@@ -81,7 +76,6 @@ class Class:
 class Method:
     def __init__(self, _name, _params):
         self.name = _name
-        self.class_name = None
         self.params = _params
         self.calls = []
 

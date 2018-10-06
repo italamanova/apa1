@@ -1,30 +1,28 @@
-package structure;
+package package2;
 
-import koko.io.MyClass;
+import package1.Panel;
+import package3.F16eXXXtreeeme;
+import package3.RailgunAmmo;
 
-public class SVar {
-	
-	String type;
-	String name;
+public class FlightSim {
+    public static void bla(){
+    }
+	public static void main(String[] args) throws InterruptedException {
+		Panel p = new Panel(60);
 
-	public SVar(String type, String name) {
-		this.type = type;
-		this.name = name;
-	}
-	
-	public String toString(){
-		return this.type + this.name;
-	}
-	
-	public boolean isEqual(SVar other){
-		return this.name.equals(other.name) && this.type.equals(other.type);
-	}
-	
-	public boolean isTypeEqual(SVar other){
-	    if(1 == 1){
-	        return true;
-	    }
-		return this.type.equals(other.type);
+		F16eXXXtreeeme f16 = new F16eXXXtreeeme(p);
+		RailgunAmmo ammo = new RailgunAmmo(f16, p);
+		while (true) {
+			for (int i = 0; i <= p.size(); i++) {
+				f16.moveRight();
+				f16.redraw();
+				for (int bulletSpeedUp = 0; bulletSpeedUp < 4; bulletSpeedUp++) {
+					ammo.animateRight();
+				}
+			}
+			f16.resetOffset();
+			ammo.resetOffset();
+		}
 	}
 
 }
