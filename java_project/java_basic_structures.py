@@ -1,6 +1,3 @@
-import inspect
-
-
 class Analysis:
     def __init__(self, _file, _hierarchy):
         self.file = _file
@@ -74,9 +71,10 @@ class Class:
 
 
 class Method:
-    def __init__(self, _name, _params):
-        self.name = _name
-        self.params = _params
+    def __init__(self, name, params, class_name=None):
+        self.name = name
+        self.params = params
+        self.class_name = class_name
         self.calls = []
 
     def __str__(self):
@@ -94,15 +92,20 @@ class Method:
 
 
 class Call:
-    def __init__(self, _name):
-        self.name = _name
-        self.class_name = None
+    def __init__(self, name, qualifier, class_name=None):
+        self.name = name
+        self.qualifier = qualifier
+        self.class_name = class_name
 
     def __str__(self):
-        return '%s' % (self.name)
+        if self.class_name:
+            return '%s.%s' % (self.class_name, self.name)
+        return '%s' % self.name
 
     def __repr__(self):
-        return '%s' % (self.name)
+        if self.class_name:
+            return '%s.%s' % (self.class_name, self.name)
+        return '%s' % self.name
 
     def __eq__(self, other):
         return self.name == other.name

@@ -5,7 +5,8 @@ import package3.F16eXXXtreeeme;
 import package3.RailgunAmmo;
 
 public class FlightSim {
-    public static void bla(){
+    public static void bla(int ivar){
+    }
     }
 	public static void main(String[] args) throws InterruptedException {
 		Panel p = new Panel(60);
