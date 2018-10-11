@@ -29,9 +29,10 @@ class Package:
 
 
 class Class:
-    def __init__(self, _name, _parent):
+    def __init__(self, _name, extends=None, implements=None):
         self.name = _name
-        self.parent = _parent
+        self.extends = extends
+        self.implements = implements
         self.methods = []
 
     def __str__(self):
@@ -83,6 +84,11 @@ class Method:
     def __repr__(self):
         return 'Method %s.%s, Calls: %s' % (self.class_name, self.name, self.calls)
 
+    @property
+    def pretty_name(self):
+        return '%s.%s' % (self.class_name, self.name)
+
+
     def add_call(self, call):
         if call not in self.calls:
             self.calls.append(call)
@@ -107,14 +113,17 @@ class Call:
             return '%s.%s' % (self.class_name, self.name)
         return '%s' % self.name
 
+    @property
+    def pretty_name(self):
+        if self.class_name:
+            return '%s.%s' % (self.class_name, self.name)
+        return '%s' % self.name
+
     def __eq__(self, other):
         return self.name == other.name
 
     def __hash__(self):
         return hash("call" * len(self.name))
-
-    def set_class_name(self, _class_name):
-        self.class_name = _class_name
 
 
 class Variable:
