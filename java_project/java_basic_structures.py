@@ -36,7 +36,7 @@ class Class:
         self.methods = []
 
     def __str__(self):
-        return 'Class %s Methods: %s' % (self.name, self.methods)
+        return 'Class %s Methods: %s\n' % (self.name, self.methods)
         # return self.name
 
     def __repr__(self):
@@ -70,6 +70,13 @@ class Class:
                 if call.name == call_name:
                     call.set_class_name(class_instance.name)
 
+    def get_children(self, classes):
+        children = []
+        for class_instance in classes:
+            if class_instance.extends == self.name:
+                children.append(class_instance)
+        return children
+
 
 class Method:
     def __init__(self, name, params, class_name=None):
@@ -87,7 +94,6 @@ class Method:
     @property
     def pretty_name(self):
         return '%s.%s' % (self.class_name, self.name)
-
 
     def add_call(self, call):
         if call not in self.calls:

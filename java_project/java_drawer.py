@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
+
 plt.style.use('seaborn-whitegrid')
-import numpy as np
 from graphviz import Digraph
 
 
@@ -13,24 +13,26 @@ def draw_graph(graph_file_path, edges_dict):
     g.view()
 
 
-def draw_call_graph(graph_file_path, call_graph_dict):
+def draw_call_graph(call_graph_list):
     name = 'pictures/call_graph.gv'
     g = Digraph('G', filename=name)
-    for node in call_graph_dict:
-        for node_child in call_graph_dict.get(node):
-            g.edge('%s' % node, '%s' % node_child)
+    for node in call_graph_list:
+        g.edge('%s' % node[0], '%s' % node[1])
     g.view()
 
 
-def draw_plot(x, y):
+def draw_plot(wmc, rfc):
     fig = plt.figure()
-    plt.plot(x, y, 'o')
-    plt.xlabel('LND')
-    plt.ylabel('WMC')
-    plt.title('Assignment 2, metrics')
-    fig.savefig('pictures/plot2.png')
 
+    for key, value in wmc.items():
+        x = value
+        y = rfc[key]
+        plt.plot(x, y, 'bo')
+        plt.text(x * (1 + 0.02), y * (1 + 0.02), key, fontsize=8)
 
-y = [1, 4, 9, 16]
-x = [1, 2, 3, 4]
-draw_plot(x, y)
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+
+    plt.xlabel('WMC')
+    plt.ylabel('RFC')
+    plt.title('Metrics')
+    fig.savefig('pictures/plot.png')
