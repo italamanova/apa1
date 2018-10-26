@@ -3,183 +3,14 @@ import os
 import javalang
 import matplotlib.pyplot as plt
 
-plt.style.use('seaborn-whitegrid')
-from graphviz import Digraph
 from javalang.tree import MethodInvocation, VariableDeclaration, VariableDeclarator, ClassDeclaration, \
     MethodDeclaration, Import, PackageDeclaration, ConstructorDeclaration, IfStatement, WhileStatement, ForStatement, \
     ClassCreator
 
+from java_project.java_basic_structures import Class, Call, Method, Variable
+from java_project.java_drawer import draw_call_graph, draw_plot
 
-############## BASIC STRUCTURE ################
-class Package:
-    def __init__(self, _name):
-        self.name = _name
-
-    def __str__(self):
-        return 'Package %s' % (self.name)
-        # return self.name
-
-    def __repr__(self):
-        return 'Package %s Classes: %s' % (self.name, self.classes)
-        # return self.name
-
-
-class Class:
-    def __init__(self, _name, extends=None, implements=None):
-        self.name = _name
-        self.extends = extends
-        self.implements = implements
-        self.methods = []
-
-    def __str__(self):
-        return 'Class %s Methods: %s\n' % (self.name, self.methods)
-        # return self.name
-
-    def __repr__(self):
-        return 'Class %s Methods: %s' % (self.name, self.methods)
-        # return self.name
-
-    def __eq__(self, other):
-        return self.name == other.name
-
-    def __hash__(self):
-        return hash("foobar" * len(self.name))
-
-    def add_method(self, method):
-        if method not in self.methods:
-            self.methods.append(method)
-
-    def get_method(self, method_name):
-        for method in self.methods:
-            if method.name == method_name:
-                return method
-        return None
-
-    def get_call_class(self, call_instance_name):
-        for method in self.methods:
-            if method.name == call_instance_name:
-                return self
-
-    def set_call_class(self, call_name, class_instance):
-        for method in self.methods:
-            for call in method.calls:
-                if call.name == call_name:
-                    call.set_class_name(class_instance.name)
-
-    def get_children(self, classes):
-        children = []
-        for class_instance in classes:
-            if class_instance.extends == self.name:
-                children.append(class_instance)
-        return children
-
-
-class Method:
-    def __init__(self, name, params, class_name=None):
-        self.name = name
-        self.params = params
-        self.class_name = class_name
-        self.calls = []
-
-    def __str__(self):
-        return 'Method %s.%s, Calls: %s' % (self.class_name, self.name, self.calls)
-
-    def __repr__(self):
-        return 'Method %s.%s, Calls: %s' % (self.class_name, self.name, self.calls)
-
-    @property
-    def pretty_name(self):
-        return '%s.%s' % (self.class_name, self.name)
-
-    def add_call(self, call):
-        if call not in self.calls:
-            self.calls.append(call)
-
-    def is_equal(self, method_call_name):
-        return method_call_name == self.name
-
-
-class Call:
-    def __init__(self, name, qualifier, class_name=None):
-        self.name = name
-        self.qualifier = qualifier
-        self.class_name = class_name
-
-    def __str__(self):
-        if self.class_name:
-            return '%s.%s' % (self.class_name, self.name)
-        return '%s' % self.name
-
-    def __repr__(self):
-        if self.class_name:
-            return '%s.%s' % (self.class_name, self.name)
-        return '%s' % self.name
-
-    @property
-    def pretty_name(self):
-        if self.class_name:
-            return '%s.%s' % (self.class_name, self.name)
-        return '%s' % self.name
-
-    def __eq__(self, other):
-        return self.name == other.name
-
-    def __hash__(self):
-        return hash("call" * len(self.name))
-
-
-class Variable:
-    def __init__(self, _name, _type):
-        self.name = _name
-        self.type = _type
-
-    def __str__(self):
-        return '%s %s' % (self.type, self.name)
-
-    def __repr__(self):
-        return '%s %s' % (self.type, self.name)
-
-
-############## DRAWER ################
-def draw_graph(graph_file_path, edges_dict):
-    name = 'pictures/graph.gv'
-    g = Digraph('G', filename=name)
-    for parent in edges_dict:
-        for child in edges_dict.get(parent):
-            g.edge(parent.name, child.name)
-    g.view()
-
-
-def draw_call_graph(call_graph_list):
-    name = 'pictures/call_graph.gv'
-    g = Digraph('G', filename=name)
-    for node in call_graph_list:
-        g.edge('%s' % node[0], '%s' % node[1])
-    g.view()
-
-
-def draw_plot(wmc, rfc):
-    fig = plt.figure()
-
-    for key, value in wmc.items():
-        x = value
-        y = rfc[key]
-        plt.plot(x, y, 'bo')
-        plt.text(x * (1 + 0.02), y * (1 + 0.02), key, fontsize=8)
-
-    plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-    plt.xlabel('WMC')
-    plt.ylabel('RFC')
-    plt.title('Metrics')
-    fig.savefig('pictures/plot.png')
-
-
-file_structure = []
-all_methods = []
-
-call_graph = {}
-
+plt.style.use('seaborn-whitegrid')
 
 ### HELPERS ###
 
@@ -209,15 +40,14 @@ def get_parent_folder(folder_path):
 
 
 def add_parent_class_methods(classes):
-    pass
-    # for class_instance in classes:
-    #     print(class_instance.name, class_instance.extends)
-    # if class_instance.extends:
-    #     parent = find_in_list(lambda item: item.name == class_instance.extends, classes)
-    #     for method in parent.methods:
-    #         child_method = Method(method.name, method.params, class_name=class_instance)
-    #         child_method.calls = method.calls
-    #         class_instance.add_method(child_method)
+    for class_instance in classes:
+        print(class_instance.name, class_instance.extends)
+    if class_instance.extends:
+        parent = find_in_list(lambda item: item.name == class_instance.extends, classes)
+        for method in parent.methods:
+            child_method = Method(method.name, method.params, class_name=class_instance)
+            child_method.calls = method.calls
+            class_instance.add_method(child_method)
 
 
 def find_call_type(variable_list, qualifier):
@@ -406,17 +236,22 @@ def prepare_call_graph(proj_classes):
     draw_call_graph(graph_call)
 
 
-var = input("Please enter file path: ")
-print("File path: " + str(var))
-_file_path = str(var)
+# var = input("Please enter file path: ")
+# print("File path: " + str(var))
+# _file_path = str(var)
+_file_path = '/home/talamash/PycharmProjects/apa1/tests/bytecode-viewer-master/src/jd/cli/Main.java'
 project_classes, count_wmc = build_project_structure(_file_path)
 for item in project_classes:
     print(item)
-count_rfc = count_response(project_classes)
 
-print('WMC', count_wmc)
-print('RFC', count_rfc)
+######### A2 #########
+# count_rfc = count_response(project_classes)
+#
+# print('WMC', count_wmc)
+# print('RFC', count_rfc)
+#
+# draw_plot(count_wmc, count_rfc)
 
-draw_plot(count_wmc, count_rfc)
+#######################
 
 prepare_call_graph(project_classes)
