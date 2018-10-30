@@ -1,3 +1,4 @@
 graphviz
 javalang
 matplotlib
+networkx
