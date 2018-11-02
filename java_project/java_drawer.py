@@ -3,12 +3,14 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
 from graphviz import Digraph
 
-def draw_graph(graph_file_path, edges_dict):
-    name = 'pictures/graph.gv'
+def draw_graph(nodes, edges):
+    name = 'pictures/graph1.gv'
     g = Digraph('G', filename=name)
-    for parent in edges_dict:
-        for child in edges_dict.get(parent):
-            g.edge(parent.name, child.name)
+
+    for node in nodes:
+        g.node(node)
+    for edge_parent, edge_child in edges:
+        g.edge(edge_parent, edge_child)
     g.view()
 
 

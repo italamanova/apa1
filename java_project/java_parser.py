@@ -1,4 +1,5 @@
 import os
+import sys
 
 import javalang
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ from javalang.tree import MethodInvocation, VariableDeclaration, VariableDeclara
     ClassCreator
 
 from java_project.java_basic_structures import Class, Call, Method, Variable
-from java_project.java_drawer import draw_call_graph, draw_plot
+from java_project.java_drawer import draw_call_graph, draw_plot, draw_graph
 
 plt.style.use('seaborn-whitegrid')
 
@@ -41,13 +42,14 @@ def get_parent_folder(folder_path):
 
 def add_parent_class_methods(classes):
     for class_instance in classes:
-        print(class_instance.name, class_instance.extends)
-    if class_instance.extends:
-        parent = find_in_list(lambda item: item.name == class_instance.extends, classes)
-        for method in parent.methods:
-            child_method = Method(method.name, method.params, class_name=class_instance)
-            child_method.calls = method.calls
-            class_instance.add_method(child_method)
+    #     print(class_instance.name, class_instance.extends)
+        if class_instance.extends:
+            parent = find_in_list(lambda item: item.name == class_instance.extends, classes)
+            if parent:
+                for method in parent.methods:
+                    child_method = Method(method.name, method.params, class_name=class_instance.name)
+                    child_method.calls = method.calls
+                    class_instance.add_method(child_method)
 
 
 def find_call_type(variable_list, qualifier):
@@ -121,6 +123,7 @@ def build_file_structure(file_path, project_classes, count_wmc, package_start=No
                 imports.append(node.path)
 
             if isinstance(node, ClassDeclaration):
+
                 class_instance = Class(node.name, node.extends)
                 if node.extends:
                     class_instance.extends = node.extends.name
@@ -226,23 +229,26 @@ def get_methods_recursively(method_instance, classes, graph_call):
 
 
 def prepare_call_graph(proj_classes):
-    graph_call = []
-    # TODO: need to draw
-    for class_instance in project_classes:
-        if class_instance.get_method('main'):
-            main_method = class_instance.get_method('main')
-            get_methods_recursively(main_method, proj_classes, graph_call)
-
-    draw_call_graph(graph_call)
+    nodes = []
+    edges = []
+    for class_instance in proj_classes:
+        for method_instance in class_instance.methods:
+            print(method_instance.pretty_name)
+            nodes.append(method_instance.pretty_name)
+            for call_instance in method_instance.calls:
+                edges.append((method_instance.pretty_name, call_instance.pretty_name))
+    # print(nodes, edges)
+    draw_graph(nodes, edges)
 
 
 # var = input("Please enter file path: ")
 # print("File path: " + str(var))
 # _file_path = str(var)
-_file_path = '/home/talamash/PycharmProjects/apa1/tests/bytecode-viewer-master/src/jd/cli/Main.java'
+# _file_path = '/home/talamash/PycharmProjects/apa1/tests/test_project/src/package2/FlightSim.java'
+_file_path = '/home/talamash/PycharmProjects/apa1/tests/CraftMania-master/CraftMania/src/org/craftmania/CraftMania.java'
 project_classes, count_wmc = build_project_structure(_file_path)
-for item in project_classes:
-    print(item)
+# for item in project_classes:
+#     print(item)
 
 ######### A2 #########
 # count_rfc = count_response(project_classes)

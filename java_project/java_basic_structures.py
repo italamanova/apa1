@@ -36,7 +36,7 @@ class Class:
         self.methods = []
 
     def __str__(self):
-        return 'Class %s Methods: %s\n' % (self.name, self.methods)
+        return 'Class %s Methods: %s' % (self.name, self.methods)
         # return self.name
 
     def __repr__(self):
@@ -93,6 +93,7 @@ class Method:
 
     @property
     def pretty_name(self):
+        print('class_name', self.class_name)
         return '%s.%s' % (self.class_name, self.name)
 
     def add_call(self, call):
