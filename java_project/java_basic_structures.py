@@ -93,7 +93,6 @@ class Method:
 
     @property
     def pretty_name(self):
-        print('class_name', self.class_name)
         return '%s.%s' % (self.class_name, self.name)
 
     def add_call(self, call):

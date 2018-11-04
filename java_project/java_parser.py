@@ -1,17 +1,18 @@
 import os
-import sys
 
 import javalang
 import matplotlib.pyplot as plt
-
+import networkx as nx
 from javalang.tree import MethodInvocation, VariableDeclaration, VariableDeclarator, ClassDeclaration, \
     MethodDeclaration, Import, PackageDeclaration, ConstructorDeclaration, IfStatement, WhileStatement, ForStatement, \
     ClassCreator
 
+from java_project.dominance import process_graph
 from java_project.java_basic_structures import Class, Call, Method, Variable
-from java_project.java_drawer import draw_call_graph, draw_plot, draw_graph
+from java_project.java_drawer import draw_networkx_graph, draw_graph, draw_plot
 
 plt.style.use('seaborn-whitegrid')
+
 
 ### HELPERS ###
 
@@ -42,7 +43,7 @@ def get_parent_folder(folder_path):
 
 def add_parent_class_methods(classes):
     for class_instance in classes:
-    #     print(class_instance.name, class_instance.extends)
+        #     print(class_instance.name, class_instance.extends)
         if class_instance.extends:
             parent = find_in_list(lambda item: item.name == class_instance.extends, classes)
             if parent:
@@ -233,31 +234,71 @@ def prepare_call_graph(proj_classes):
     edges = []
     for class_instance in proj_classes:
         for method_instance in class_instance.methods:
-            print(method_instance.pretty_name)
             nodes.append(method_instance.pretty_name)
             for call_instance in method_instance.calls:
                 edges.append((method_instance.pretty_name, call_instance.pretty_name))
     # print(nodes, edges)
-    draw_graph(nodes, edges)
+    return nodes, edges
 
 
-# var = input("Please enter file path: ")
-# print("File path: " + str(var))
-# _file_path = str(var)
-# _file_path = '/home/talamash/PycharmProjects/apa1/tests/test_project/src/package2/FlightSim.java'
-_file_path = '/home/talamash/PycharmProjects/apa1/tests/CraftMania-master/CraftMania/src/org/craftmania/CraftMania.java'
+########### A3 ##################
+
+def create_class_graph(project_classes, main_class_name):
+    all_classes_names = [_class.name for _class in project_classes]
+
+    class_graph = nx.DiGraph()
+
+    for _class in project_classes:
+        for _method in _class.methods:
+            for _call in _method.calls:
+                _call_class_name = _call.class_name
+                if _call_class_name and (_call_class_name in all_classes_names):
+                    class_graph.add_edge(_class.name, _call.class_name)
+                    # print(_class.name, _call.class_name)
+    print(class_graph.edges)
+    print('total', len(class_graph.nodes))
+
+    children = [node for node in nx.dfs_preorder_nodes(class_graph, main_class_name)]
+    nodes_to_remove = list(set(class_graph.nodes) - set(children))
+
+    for node in nodes_to_remove:
+        class_graph.remove_node(node)
+
+    print('after removal', len(class_graph.nodes), class_graph.nodes)
+    return class_graph
+
+#################################
+
+var = input("Please enter file path: ")
+print("File path: " + str(var))
+_file_path = str(var)
+
+# _file_path = '/home/talamash/PycharmProjects/apa1/tests/CraftMania-master/CraftMania/src/org/craftmania/CraftMania.java'
+main_class_name = _file_path.split('/')[-1].split('.')[0]
+print('Main class:' ,main_class_name)
 project_classes, count_wmc = build_project_structure(_file_path)
-# for item in project_classes:
-#     print(item)
 
 ######### A2 #########
-# count_rfc = count_response(project_classes)
-#
-# print('WMC', count_wmc)
-# print('RFC', count_rfc)
-#
-# draw_plot(count_wmc, count_rfc)
+count_rfc = count_response(project_classes)
+
+print('WMC', count_wmc)
+print('RFC', count_rfc)
+
+draw_plot(count_wmc, count_rfc)
 
 #######################
 
-prepare_call_graph(project_classes)
+######### A3 #########
+
+print('project_classes', project_classes)
+
+
+nodes, edges = prepare_call_graph(project_classes)
+draw_graph(nodes, edges)
+
+class_graph = create_class_graph(project_classes, main_class_name)
+draw_networkx_graph(class_graph)
+
+process_graph(class_graph, main_class_name)
+
+#######################

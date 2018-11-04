@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
 from graphviz import Digraph
 
+
 def draw_graph(nodes, edges):
-    name = 'pictures/graph1.gv'
+    name = 'pictures/graph.gv'
     g = Digraph('G', filename=name)
 
     for node in nodes:
@@ -15,10 +16,18 @@ def draw_graph(nodes, edges):
 
 
 def draw_call_graph(call_graph_list):
-    name = 'pictures/call_graph.gv'
+    name = 'pictures/call_graph_classes.gv'
     g = Digraph('G', filename=name)
     for node in call_graph_list:
         g.edge('%s' % node[0], '%s' % node[1])
+    g.view()
+
+
+def draw_networkx_graph(nx_graph):
+    name = 'pictures/nx_graph.gv'
+    g = Digraph('G', filename=name)
+    for edge in nx_graph.edges:
+        g.edge('%s' % edge[0], '%s' % edge[1])
     g.view()
 
 
@@ -43,6 +52,3 @@ file_structure = []
 all_methods = []
 
 call_graph = {}
-
-
-
